@@ -1,23 +1,18 @@
-# Visual review
+# Native reconstruction review
 
-Scene artwork now uses the original 830 × 830 image samples encoded as lossless WebP. This preserves facial features, line work, lettering, gradients and background details from the supplied recording. Palette reduction and polygon approximation previously changed those details.
+The frame playback renderer has been replaced with native Canvas drawing in all twenty scenes. Runtime artwork contains no crops or extracted source frames. The video is used offline to study composition, movements and timing; its extracted soundtrack remains in the application.
 
-## Rendering and timing
+## Implemented
 
-- Camera positions follow the measured pans and exact stationary card centres. Desktop poster geometry remains 830 × 830 at x=545, y=40, with 885px pitch.
-- Each scene samples the reference at 30fps and stores frames in independently loadable one-second chunks. Seeking selects an absolute sample, making repeated seeks deterministic.
-- Native image samples are decoded and resized in three background workers, with a single high-quality resize to the physical display size and a browser decoder fallback. The old 640px cache was enlarged to 830px on desktop and 1660px on Retina, introducing extra blur.
-- Preview images use the original central poses. The animated bitmap cache has a 96 MiB budget; current neighbouring samples remain available while older samples are released. Under decode load, playback can briefly retain the nearest prepared sample. Paused comparisons wait for the exact sample.
-- The browser draws prepared artwork into Canvas; it does not download or play the source MP4. Visual time and audio suspend together while a required chunk loads.
+- Twenty procedural backgrounds, costumes and separate scene performances.
+- Joint interpolation, tapered limbs, head details, paper-cut decoration, chalk outlines, boxing gloves, Kato’s mask, tracksuit stripes and the giant’s bald head and sunglasses.
+- Supporting actors, delayed pupil movements, dance steps, opponent attacks and reactions, push-ups, ship motion, broken props, mirror reflections, glass cracks, fireworks and the bronze statue.
+- Numeric camera measurements retain the recorded pans and stationary holds. Desktop artwork is 830px square, with an 885px pitch.
+- Static caches are created at physical screen resolution; foreground drawing uses the actual Canvas transform. The mosaic is intentionally tiled from our own native illustration.
+- Playback uses absolute timestamps without frame sampling, image decoding or artwork buffering. Repeated seeking is deterministic.
 
-## Remaining differences
+## Remaining visual differences
 
-The source is approximately 60fps; the site samples motion at 30fps. Opening flips, captions outside the artwork and overview transitions have independent implementations. Content crossing card boundaries is clipped. Mobile remains an adaptation of a desktop recording. These differences mean the whole site is not a frame-exact replica.
+This is not a 1:1 reproduction. The drawn anatomy and face silhouette are simpler than the original. Background architecture, ink strokes, wave foam, textures and typography still differ. Hand contacts, running between cards and some supporting-character timing need finer reconstruction. Turning is a simplified silhouette change, rather than a full anatomical rotation. Opening flips and mobile layout are independent implementations.
 
-The character animations are source-derived image sequences rather than editable skeletal rigs. Changing a gesture requires rebuilding its artwork. The lossless artwork currently occupies 1.25 GB (1.17 GiB) across 252 files; nearby chunk loading limits the cost of a particular scene, not the download for viewing every scene.
-
-## Verification
-
-Browser comparisons were inspected at the same paused moment, 36.5 seconds, at 1920 × 1080 CSS pixels with DPR 1 and DPR 2. Desktop scenes, the overview and mobile layouts were also inspected. Temporary comparison captures are not retained in the repository.
-
-The [current overview](review/overview.png) is the retained preview. Functional tests establish rendering, interaction, native lossless asset integrity, physical cache resolution and deterministic seeking. They do not establish whole-site frame equivalence.
+The current work establishes editable graphics and animations for every scene. Passing functional tests verifies rendering and controls, not visual fidelity. The retained [overview](review/overview.png) shows the native implementation.

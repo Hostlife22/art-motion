@@ -16,7 +16,7 @@ import {
   yinYang,
   type Ctx,
 } from "./draw";
-import type { ReferenceAtlas } from "./ReferenceAtlas";
+import type { NativeArtwork } from "./NativeArtwork";
 export interface Hit {
   x: number;
   y: number;
@@ -25,7 +25,7 @@ export interface Hit {
 }
 export class GalleryRenderer {
   hits: Hit[] = [];
-  constructor(private atlas: ReferenceAtlas) {}
+  constructor(private artwork: NativeArtwork) {}
   render(c: Ctx, width: number, height: number, time: number, mobile: boolean) {
     const state = timelineAt(time),
       mobileGrid = mobile && state.grid > 0.995;
@@ -40,8 +40,6 @@ export class GalleryRenderer {
     c.translate(ox, oy);
     c.scale(scale, scale);
     this.hits = [];
-    const physicalScale = Math.hypot(c.getTransform().c, c.getTransform().d);
-    this.atlas.prefetch(time, layout.poster * physicalScale, state.grid > 0.5);
     if (state.title > 0) this.title(c, time, mobileGrid);
     for (let i = 0; i < 20; i++) {
       const card = mobileGrid
@@ -79,7 +77,7 @@ export class GalleryRenderer {
       c.clip();
       if (back) this.back(c);
       else {
-        this.atlas.draw(c, i, time, state.grid > 0.5);
+        this.artwork.draw(c, i, time, state.grid > 0.5);
       }
       border(c, "rgba(50,45,29,.18)", 0.5, 0.75);
       c.restore();

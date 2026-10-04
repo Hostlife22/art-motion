@@ -1,3 +1,5 @@
+import referenceCamera from "./referenceCamera.json" with { type: "json" };
+
 export const DURATION = 86.917;
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const mix = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -21,7 +23,10 @@ export function sceneAt(time: number) {
 export function localTime(index: number, time: number) {
   return time - entries[index];
 }
-let measuredCamera: readonly [number, number][] = [];
+let measuredCamera: readonly [number, number][] = referenceCamera as [
+  number,
+  number,
+][];
 export function installCameraTrack(track: readonly [number, number][]) {
   measuredCamera = track;
 }

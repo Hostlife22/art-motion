@@ -102,7 +102,7 @@ test("mobile overview and enlarged scenes fit without horizontal overflow", asyn
     390,
   );
 });
-test("reduced motion starts paused and source video is never requested", async ({
+test("reduced motion starts paused and no reference image or video is requested", async ({
   page,
 }) => {
   const requests: string[] = [];
@@ -114,7 +114,11 @@ test("reduced motion starts paused and source video is never requested", async (
   await expect(
     page.getByRole("button", { name: "Play", exact: true }),
   ).toBeVisible();
-  expect(requests.some((x) => x.endsWith(".mp4"))).toBe(false);
+  await page.locator("#time").fill("36.5");
+  await page.waitForTimeout(100);
+  expect(
+    requests.some((x) => /\.(mp4|webp|frames)(?:[?#]|$)|\/art\//.test(x)),
+  ).toBe(false);
   await expect(page.locator("video")).toHaveCount(0);
 });
 

@@ -4,5 +4,3 @@ playwright-report
 test-results
 docs/reference
 *.tsbuildinfo
-
-public/art/

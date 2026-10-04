@@ -1,19 +1,11 @@
-# Validation — 4 October 2026
+# Native renderer validation — 4 October 2026
 
-`npm run check` passes formatting, ESLint, strict TypeScript, 19 unit tests and the Vite production build. `npm run test:e2e` passes five Chromium tests.
+The native implementation is checked with formatting, ESLint, strict TypeScript, seventeen unit tests and the Vite production build. Five Chromium browser tests cover all twenty scenes, changing animation, deterministic seeking, playback controls, catalogue navigation, mobile layout and reduced motion.
 
-An offline comparison confirmed that all twenty decoded lossless previews are pixel-identical to their original video crops. A live Retina playback check advanced from 36.5 to 38.65 seconds in roughly two seconds, without browser errors.
+The request check rejects source MP4, WebP frame images, binary animation chunks and requests to the old artwork directory. Retina checks verify physical-size background caches after loading and resizing. All animated actors are rendered directly with Canvas drawing commands.
 
-Atlas integrity checks verify all twenty previews, native 830px dimensions, lossless WebP encoding, frame counts and the measured forward camera track. Binary chunk tests reject corrupted headers, truncated frames and unexpected trailing data.
+Unit tests cover twenty distinct finite performances at arbitrary timestamps, continuous interpolation, push-up contact targets, measured camera alignment, shared playback, audio state and cache resolution. The camera continuity check allows the unequal pan speeds observed in the recording.
 
-The browser tests render all twenty scene review times, check nonempty pixels and time-dependent motion, then seek away and back to confirm an identical canvas pixel signature. They also exercise play/pause, replay, overview, scene catalogue selection, hidden controls, keyboard restoration, mobile overflow and reduced motion. The browser never requests the source MP4.
+A contact sheet of all twenty native scenes was visually inspected against the video. Additional sampled motion sequences were reviewed for the paper dragon, Wing Chun, dance, Long Beach and arcade fight. Temporary captures are outside the repository; the retained native overview is in `docs/review/overview.png`.
 
-Sound unit tests cover default activation, seek alignment, pause, mute, tab suspension, drift correction, rejected playback and retry after autoplay blocking. Shared-clock tests cover end-of-sequence stopping, reduced-motion initialization and suspending visual/audio time while artwork chunks load.
-
-A Retina browser regression verifies that both background and animated caches cover the physical display size, including after resizing and in the detailed mosaic. Resolution unit tests cover desktop, Retina and mobile sizes.
-
-Live renderer screenshots were inspected at 1920 × 1080 with DPR 1 and DPR 2, and at 390 × 844 on mobile. Temporary screenshots and test reports were removed after validation.
-
-The production preview was also checked at DPR 2 in the detailed mosaic, and with Worker disabled to exercise the browser decoder fallback. Both checks completed without JavaScript errors or error overlays. Production assets contain no source MP4 or obsolete contour atlas.
-
-This verifies the working implementation. It does not establish frame-exact visual parity; [the visual review](VISUAL_REVIEW.md) records remaining differences.
+These checks establish functional behavior and the native rendering architecture. They do not establish 1:1 visual parity; remaining differences are recorded in [visual review](VISUAL_REVIEW.md).
