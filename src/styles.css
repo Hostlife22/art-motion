@@ -1,5 +1,5 @@
 :root {
-  --paper: #eeecdf;
+  --paper: #e8e2d9;
   --ink: #25251f;
   --red: #ae2630;
   --muted: #737565;
@@ -22,9 +22,9 @@ body {
   min-height: 100dvh;
   background: radial-gradient(
     ellipse at 45% 40%,
-    #f3f0e5,
+    #f1ebe5,
     var(--paper) 75%,
-    #e6e4d6
+    #e1dbd2
   );
 }
 main {

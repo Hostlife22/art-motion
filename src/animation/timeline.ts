@@ -21,7 +21,25 @@ export function sceneAt(time: number) {
 export function localTime(index: number, time: number) {
   return time - entries[index];
 }
+let measuredCamera: readonly [number, number][] = [];
+export function installCameraTrack(track: readonly [number, number][]) {
+  measuredCamera = track;
+}
 export function cameraAt(time: number) {
+  if (measuredCamera.length && time >= measuredCamera[0][0]) {
+    let lo = 0,
+      hi = measuredCamera.length - 1;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (measuredCamera[mid][0] <= time) lo = mid;
+      else hi = mid - 1;
+    }
+    const a = measuredCamera[lo],
+      b = measuredCamera[Math.min(lo + 1, measuredCamera.length - 1)];
+    return a[0] === b[0]
+      ? a[1]
+      : mix(a[1], b[1], clamp((time - a[0]) / (b[0] - a[0])));
+  }
   let position = 0;
   for (let i = 1; i < entries.length; i++)
     position += smooth(
@@ -53,10 +71,10 @@ export function timelineAt(time: number) {
 export const layout = {
   width: 1920,
   height: 1080,
-  poster: 824,
-  pitch: 878,
+  poster: 830,
+  pitch: 885,
   top: 40,
-  left: 548,
+  left: 545,
   gridX: 834,
   gridY: 60,
   thumb: 194,

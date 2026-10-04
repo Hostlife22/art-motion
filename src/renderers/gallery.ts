@@ -5,8 +5,6 @@ import {
   mix,
   smooth,
   timelineAt,
-  localTime,
-  SCENE_DURATION,
 } from "../animation/timeline";
 import { scenes } from "../data/scenes";
 import {
@@ -18,21 +16,16 @@ import {
   yinYang,
   type Ctx,
 } from "./draw";
-import { SceneRenderer } from "./scenes";
+import type { ReferenceAtlas } from "./ReferenceAtlas";
 export interface Hit {
   x: number;
   y: number;
   size: number;
   index: number;
 }
-const previewPhases = [
-  0.34, 0.3, 0.3, 0.4, 0.32, 0.42, 0.28, 0.42, 0.26, 0.2, 0.45, 0.38, 0.5, 0.72,
-  0.46, 0.32, 0.43, 0.54, 0.56, 0.8,
-];
 export class GalleryRenderer {
-  private scenes = new SceneRenderer();
   hits: Hit[] = [];
-  constructor(private backgrounds: HTMLCanvasElement[]) {}
+  constructor(private atlas: ReferenceAtlas) {}
   render(c: Ctx, width: number, height: number, time: number, mobile: boolean) {
     const state = timelineAt(time),
       mobileGrid = mobile && state.grid > 0.995;
@@ -47,6 +40,8 @@ export class GalleryRenderer {
     c.translate(ox, oy);
     c.scale(scale, scale);
     this.hits = [];
+    const physicalScale = Math.hypot(c.getTransform().c, c.getTransform().d);
+    this.atlas.prefetch(time, layout.poster * physicalScale, state.grid > 0.5);
     if (state.title > 0) this.title(c, time, mobileGrid);
     for (let i = 0; i < 20; i++) {
       const card = mobileGrid
@@ -84,14 +79,7 @@ export class GalleryRenderer {
       c.clip();
       if (back) this.back(c);
       else {
-        c.drawImage(this.backgrounds[i], 0, 0, 500, 500);
-        const duration = i === 19 ? 4 : SCENE_DURATION;
-        const own = localTime(i, time);
-        const thumbnail = state.grid > 0.5;
-        const sceneLocal = thumbnail
-          ? previewPhases[i] * duration + Math.sin(time * 0.8 + i) * 0.07
-          : own;
-        this.scenes.draw(c, i, sceneLocal, time, thumbnail);
+        this.atlas.draw(c, i, time, state.grid > 0.5);
       }
       border(c, "rgba(50,45,29,.18)", 0.5, 0.75);
       c.restore();
@@ -141,10 +129,10 @@ export class GalleryRenderer {
     size: number,
     mobile: boolean,
   ) {
-    const factor = size / 824,
+    const factor = size / 830,
       scene = scenes[index];
     c.save();
-    c.translate(x, y + 73 * factor);
+    c.translate(x, y + 88 * factor);
     c.scale(factor, factor);
     text(
       c,
@@ -157,14 +145,14 @@ export class GalleryRenderer {
       "italic",
     );
     c.letterSpacing = "4px";
-    text(c, scene.title, 122, -12, 22, "#35362b", "Arial");
+    text(c, scene.title, 112, -12, 22, "#35362b", "Arial");
     c.letterSpacing = "0px";
     text(
       c,
       scene.caption,
-      122,
-      24,
-      mobile ? 26 : 29,
+      112,
+      21,
+      mobile ? 26 : 27,
       "#817e6c",
       "Cormorant Garamond",
       "italic",

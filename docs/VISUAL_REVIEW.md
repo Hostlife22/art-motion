@@ -1,37 +1,23 @@
 # Visual review
 
-The reference was inspected through half-second frames and two-second contact sheets. The implementation was reviewed in Chromium at 1920 × 1080 using paused comparison URLs. Screenshots in `docs/review` are captures of the live Canvas renderer, not video frames.
+Scene artwork now uses the original 830 × 830 image samples encoded as lossless WebP. This preserves facial features, line work, lettering, gradients and background details from the supplied recording. Palette reduction and polygon approximation previously changed those details.
 
-## Reconstructed
+## Rendering and timing
 
-- All twenty works, their order, year labels, captions and distinct environments.
-- Reference desktop grid geometry, poster scale, gutters and large-scene framing.
-- Red card backs, staggered arrivals and flips, opening title, strip camera and return to overview.
-- Multiple articulated figures and distinct keyframe sequences for each work.
-- Dance partner, teacher, students, boxers, referee, supporting fighters and mirror reflections.
-- Dragon, newspaper ring, ship motion, birds, chalk and notebook annotations, bag swing, comic impacts, TV interference and subtitles, particles, box-office counter, sign damage, arcade health/K.O., mirror cracks, bronze statue, rain and fireworks.
-- The original AAC soundtrack follows the visual clock through pause and seek.
+- Camera positions follow the measured pans and exact stationary card centres. Desktop poster geometry remains 830 × 830 at x=545, y=40, with 885px pitch.
+- Each scene samples the reference at 30fps and stores frames in independently loadable one-second chunks. Seeking selects an absolute sample, making repeated seeks deterministic.
+- Native image samples are decoded and resized in three background workers, with a single high-quality resize to the physical display size and a browser decoder fallback. The old 640px cache was enlarged to 830px on desktop and 1660px on Retina, introducing extra blur.
+- Preview images use the original central poses. The animated bitmap cache has a 96 MiB budget; current neighbouring samples remain available while older samples are released. Under decode load, playback can briefly retain the nearest prepared sample. Paused comparisons wait for the exact sample.
+- The browser draws prepared artwork into Canvas; it does not download or play the source MP4. Visual time and audio suspend together while a required chunk loads.
 
-## Differences that still prevent a one-to-one match
+## Remaining differences
 
-- Figures use a newly drawn articulated rig. Facial silhouette, body contours, clothing folds and hand shapes differ from the reference.
-- Keyframe poses reproduce action categories and broad order. Contact timing and all intermediate movements have not been traced at 60 fps.
-- Camera entries are hand-transcribed estimates. A shared world-space protagonist crossing the gutter has not been reconstructed; actors enter and exit individual masks.
-- Architectural geometry, wave foam, the dragon silhouette, vintage type, mosaic pattern and Hong Kong skyline remain simplified.
-- Cormorant Garamond is a chosen substitute, not an identified original typeface. Newspaper masthead and poster typography also differ.
-- Dance steps and partner contacts, two-finger push-ups, furniture deformation and multi-opponent combat remain approximations.
-- Some environment elements are still static, including laundry and the basic lantern cords.
-- Reflections repeat transformed rig poses; there is no ray-traced mirror simulation.
-- The mobile two-column grid is an adaptation. The video provides a desktop reference only.
+The source is approximately 60fps; the site samples motion at 30fps. Opening flips, captions outside the artwork and overview transitions have independent implementations. Content crossing card boundaries is clipped. Mobile remains an adaptation of a desktop recording. These differences mean the whole site is not a frame-exact replica.
 
-## Review artifacts
+The character animations are source-derived image sequences rather than editable skeletal rigs. Changing a gesture requires rebuilding its artwork. The lossless artwork currently occupies 1.25 GB (1.17 GiB) across 252 files; nearby chunk loading limits the cost of a particular scene, not the download for viewing every scene.
 
-- [Overview](review/overview.png)
-- [Paper cut](review/dragon.png)
-- [Boxing](review/boxing.png)
-- [School](review/school.png)
-- [Arcade](review/arcade.png)
-- [Mirrors](review/mirror.png)
-- [Legend](review/legend.png)
+## Verification
 
-The browser tests establish functional rendering, determinism and interaction. They are not evidence of pixel equivalence to the source video.
+Browser comparisons were inspected at the same paused moment, 36.5 seconds, at 1920 × 1080 CSS pixels with DPR 1 and DPR 2. Desktop scenes, the overview and mobile layouts were also inspected. Temporary comparison captures are not retained in the repository.
+
+The [current overview](review/overview.png) is the retained preview. Functional tests establish rendering, interaction, native lossless asset integrity, physical cache resolution and deterministic seeking. They do not establish whole-site frame equivalence.

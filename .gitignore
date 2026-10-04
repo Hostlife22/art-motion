@@ -4,5 +4,11 @@ dist/
 .DS_Store
 playwright-report/
 test-results/
-docs/reference/frames/
+docs/reference/
 ssstwitter.com_*.mp4
+
+__pycache__/
+
+# Generated visual comparisons; retain only the README preview.
+docs/review/*
+!docs/review/overview.png

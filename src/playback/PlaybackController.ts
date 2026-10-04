@@ -21,6 +21,7 @@ export class PlaybackController {
   private readonly clock = new Clock();
   private audio: AudioSync | null = null;
   private hidden = false;
+  private waitingForScene = false;
   private sound: SoundState = "on";
   private message = "";
   private lastNotification = 0;
@@ -62,7 +63,11 @@ export class PlaybackController {
     this.listeners.forEach((listener) => listener());
   }
   private syncAudio() {
-    this.audio?.sync(this.clock.time, this.clock.playing, this.hidden);
+    this.audio?.sync(
+      this.clock.time,
+      this.clock.playing,
+      this.hidden || this.waitingForScene,
+    );
   }
   connectAudio(media: AudioPort) {
     this.audio?.dispose();
@@ -91,7 +96,13 @@ export class PlaybackController {
   }
   visibility(hidden: boolean) {
     this.hidden = hidden;
-    this.clock.visibility(hidden);
+    this.clock.visibility(hidden || this.waitingForScene);
+    this.syncAudio();
+  }
+  buffering(waiting: boolean) {
+    if (this.waitingForScene === waiting) return;
+    this.waitingForScene = waiting;
+    this.clock.visibility(this.hidden || waiting);
     this.syncAudio();
   }
   seek = (time: number) => {
@@ -125,7 +136,7 @@ export class PlaybackController {
     this.audio?.setEnabled(
       true,
       this.clock.time,
-      this.clock.playing && !this.hidden,
+      this.clock.playing && !this.hidden && !this.waitingForScene,
     );
     this.publish();
   };
@@ -137,7 +148,7 @@ export class PlaybackController {
     this.audio?.setEnabled(
       enabled,
       this.clock.time,
-      this.clock.playing && !this.hidden,
+      this.clock.playing && !this.hidden && !this.waitingForScene,
     );
     this.publish();
   };

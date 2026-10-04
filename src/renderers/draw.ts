@@ -1,6 +1,6 @@
 export type Ctx = CanvasRenderingContext2D;
 export const palette = {
-  paper: "#eeecdf",
+  paper: "#e8e2d9",
   ink: "#25251f",
   red: "#ae2630",
   cream: "#f5e5b4",

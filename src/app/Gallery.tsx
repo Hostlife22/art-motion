@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GalleryRenderer } from "../renderers/gallery";
-import { createBackgrounds } from "../renderers/backgrounds";
-import { timelineAt, sceneTime } from "../animation/timeline";
+import { ReferenceAtlas } from "../renderers/ReferenceAtlas";
+import { timelineAt, sceneTime, sceneAt } from "../animation/timeline";
 import type { PlaybackController } from "../playback/PlaybackController";
 export function Gallery({
   playback,
@@ -14,7 +14,8 @@ export function Gallery({
     stage = useRef<HTMLDivElement>(null),
     renderer = useRef<GalleryRenderer | null>(null);
   const [error, setError] = useState(""),
-    [ready, setReady] = useState(false);
+    [ready, setReady] = useState(false),
+    [fetching, setFetching] = useState(false);
   useEffect(() => {
     const element = canvas.current,
       container = stage.current;
@@ -31,7 +32,10 @@ export function Gallery({
       width = 0,
       height = 0,
       dirty = true,
-      previous = -1;
+      previous = -1,
+      reportedError = false,
+      awaitingMotion = false;
+    let atlas: ReferenceAtlas | null = null;
     const resize = () => {
       const bounds = container.getBoundingClientRect();
       width = bounds.width;
@@ -59,6 +63,19 @@ export function Gallery({
         previous = time;
         dirty = false;
       }
+      const motionReady =
+        timelineAt(time).grid > 0.5 ||
+        !!atlas?.ready(sceneAt(time), !playback.getSnapshot().playing);
+      container.dataset.motionReady = String(motionReady);
+      if (awaitingMotion !== !motionReady) {
+        awaitingMotion = !motionReady;
+        setFetching(awaitingMotion);
+        playback.buffering(awaitingMotion);
+      }
+      if (atlas?.error && !reportedError) {
+        reportedError = true;
+        setError(atlas.error);
+      }
       frame = requestAnimationFrame(render);
     };
     Promise.all([
@@ -66,17 +83,28 @@ export function Gallery({
       document.fonts.load('400 32px "Cormorant Garamond"'),
       document.fonts.load('italic 32px "Cormorant Garamond"'),
     ])
-      .then(() => {
+      .then(async () => {
         if (disposed) return;
         try {
-          renderer.current = new GalleryRenderer(createBackgrounds(seed));
+          atlas = await ReferenceAtlas.create(
+            playback.getSnapshot().time,
+            () => {
+              dirty = true;
+            },
+          );
+          if (disposed) {
+            atlas.dispose();
+            return;
+          }
+          renderer.current = new GalleryRenderer(atlas);
           resize();
           setReady(true);
           frame = requestAnimationFrame(render);
         } catch (e) {
-          setError(
-            e instanceof Error ? e.message : "Unable to draw the gallery.",
-          );
+          if (!disposed)
+            setError(
+              e instanceof Error ? e.message : "Unable to draw the gallery.",
+            );
         }
       })
       .catch((e: unknown) => {
@@ -91,6 +119,8 @@ export function Gallery({
       observer.disconnect();
       document.removeEventListener("visibilitychange", visibility);
       renderer.current = null;
+      atlas?.dispose();
+      playback.buffering(false);
     };
   }, [playback, seed]);
   return (
@@ -113,6 +143,11 @@ export function Gallery({
       {!ready && !error && (
         <p className="loading" role="status">
           Preparing the twenty moments…
+        </p>
+      )}
+      {ready && fetching && !error && (
+        <p className="loading" role="status">
+          Loading this moment…
         </p>
       )}
       {error && (

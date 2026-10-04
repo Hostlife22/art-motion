@@ -8,7 +8,6 @@ import {
   sceneTime,
   timelineAt,
 } from "../animation/timeline";
-import { actions, poseAt } from "../animation/poses";
 import { scenes } from "../data/scenes";
 import { Clock } from "../animation/clock";
 import { PlaybackController } from "../playback/PlaybackController";
@@ -19,7 +18,7 @@ describe("twenty-scene timeline", () => {
     for (let i = 0; i < 20; i++) {
       expect(sceneAt(sceneTime(i))).toBe(i);
       expect(cameraAt(sceneTime(i))).toBe(i);
-      expect(cardAt(i, sceneTime(i)).x).toBe(548);
+      expect(cardAt(i, sceneTime(i)).x).toBe(545);
     }
   });
   it("preserves ordering and keeps overlapping camera transitions continuous", () => {
@@ -37,33 +36,24 @@ describe("twenty-scene timeline", () => {
     for (let i = 0; i < 20; i++) expect(cardAt(i, 3.5)).toEqual(cardAt(i, 84));
     expect(timelineAt(DURATION).title).toBe(1);
   });
-  it("has finite continuous articulated poses for every action, including out-of-range seeks", () => {
-    expect(actions).toHaveLength(20);
-    for (const sequence of actions) {
-      for (const phase of [-1, 0, 0.13, 0.5, 0.74, 1, 4]) {
-        const p = poseAt(sequence, phase);
-        expect(
-          [
-            p.lean,
-            p.head,
-            p.hipY,
-            p.turn,
-            ...p.leftHand,
-            ...p.rightHand,
-            ...p.leftFoot,
-            ...p.rightFoot,
-          ].every(Number.isFinite),
-        ).toBe(true);
-      }
-      for (let phase = 0; phase < 1; phase += 0.02) {
-        const a = poseAt(sequence, phase),
-          b = poseAt(sequence, phase + 0.001);
-        expect(Math.abs(a.rightHand[0] - b.rightHand[0])).toBeLessThan(4);
-      }
-    }
-  });
 });
 describe("shared playback", () => {
+  it("holds the visual and audio clock while the next artwork chunk loads", () => {
+    const p = new PlaybackController({
+      initialTime: null,
+      reducedMotion: false,
+    });
+    p.advance(0);
+    p.advance(100);
+    p.buffering(true);
+    p.advance(1000);
+    expect(p.getSnapshot().time).toBe(0.1);
+    expect(p.getSnapshot().playing).toBe(true);
+    p.buffering(false);
+    p.advance(2000);
+    p.advance(2100);
+    expect(p.getSnapshot().time).toBe(0.2);
+  });
   it("pauses hidden tabs without skipping on return and stops at the final frame", () => {
     const c = new Clock();
     c.tick(0);

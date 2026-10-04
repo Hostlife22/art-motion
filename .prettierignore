@@ -2,5 +2,7 @@ node_modules
 dist
 playwright-report
 test-results
-docs/reference/frames
+docs/reference
 *.tsbuildinfo
+
+public/art/
