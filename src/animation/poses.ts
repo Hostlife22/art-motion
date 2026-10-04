@@ -3,6 +3,11 @@ export type Point = [number, number];
 export interface Pose {
   lean: number;
   shoulderY?: number;
+  front?: number;
+  leftElbow?: Point;
+  rightElbow?: Point;
+  leftKnee?: Point;
+  rightKnee?: Point;
   head: number;
   leftHand: Point;
   rightHand: Point;
@@ -209,12 +214,45 @@ export const poses: Record<string, Pose> = {
     rightFoot: [68, 179],
   },
 };
+function bendJoint(a: Point, b: Point, length: number, bend: number): Point {
+  const dx = b[0] - a[0],
+    dy = b[1] - a[1],
+    d = Math.max(0.01, Math.hypot(dx, dy));
+  const height = Math.sqrt(
+    Math.max(0, length * length - Math.min(d / 2, length) ** 2),
+  );
+  return [
+    a[0] + dx * 0.5 - (dy / d) * height * bend,
+    a[1] + dy * 0.5 + (dx / d) * height * bend,
+  ];
+}
+/** Explicit joint targets override IK for contacts, planted stances and airborne poses. */
+export function jointsAt(pose: Pose) {
+  const y = pose.shoulderY ?? 47;
+  return {
+    leftElbow:
+      pose.leftElbow ?? bendJoint([pose.lean - 8, y], pose.leftHand, 38, 1),
+    rightElbow:
+      pose.rightElbow ?? bendJoint([pose.lean + 8, y], pose.rightHand, 38, 1),
+    leftKnee:
+      pose.leftKnee ?? bendJoint([-6, pose.hipY], pose.leftFoot, 51, -1),
+    rightKnee:
+      pose.rightKnee ?? bendJoint([6, pose.hipY], pose.rightFoot, 51, -1),
+  };
+}
 export function blend(a: Pose, b: Pose, t: number): Pose {
   const point = (p: Point, q: Point): Point => [
     mix(p[0], q[0], t),
     mix(p[1], q[1], t),
   ];
+  const aj = jointsAt(a),
+    bj = jointsAt(b);
   return {
+    front: mix(a.front ?? 0, b.front ?? 0, t),
+    leftElbow: point(aj.leftElbow, bj.leftElbow),
+    rightElbow: point(aj.rightElbow, bj.rightElbow),
+    leftKnee: point(aj.leftKnee, bj.leftKnee),
+    rightKnee: point(aj.rightKnee, bj.rightKnee),
     lean: mix(a.lean, b.lean, t),
     shoulderY: mix(a.shoulderY ?? 47, b.shoulderY ?? 47, t),
     head: mix(a.head, b.head, t),

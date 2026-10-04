@@ -1,5 +1,5 @@
 import { circle, line, path, type Ctx } from "./draw";
-import type { Point, Pose } from "../animation/poses";
+import { jointsAt, type Point, type Pose } from "../animation/poses";
 export interface Costume {
   skin: string;
   hair: string;
@@ -12,10 +12,13 @@ export interface Costume {
   stripe?: string;
   mask?: boolean;
   sleeves?: boolean;
+  collar?: boolean;
   paperCut?: boolean;
   gloves?: boolean;
   bald?: boolean;
   glasses?: boolean;
+  shorts?: boolean;
+  hat?: boolean;
 }
 export const costumes: Costume[] = [
   {
@@ -36,6 +39,7 @@ export const costumes: Costume[] = [
     shoe: "#292f24",
   },
   {
+    shorts: true,
     skin: "#d7b58a",
     hair: "#242c22",
     top: "#f0efdb",
@@ -68,6 +72,7 @@ export const costumes: Costume[] = [
     shoe: "#e5e9d7",
   },
   {
+    sleeves: true,
     skin: "#d4b085",
     hair: "#292d25",
     top: "#6a7480",
@@ -104,7 +109,9 @@ export const costumes: Costume[] = [
     top: "#131d1e",
     pants: "#131d1e",
     shoe: "#111b1c",
+    collar: true,
     mask: true,
+    hat: true,
     sleeves: true,
   },
   {
@@ -117,6 +124,7 @@ export const costumes: Costume[] = [
     lineArt: true,
   },
   {
+    collar: true,
     skin: "#d5d7c3",
     hair: "#333c32",
     top: "#bcbfaf",
@@ -178,17 +186,6 @@ export const costumes: Costume[] = [
     shoe: "#142122",
   },
 ];
-function joint(a: Point, b: Point, length: number, bend: number): Point {
-  const dx = b[0] - a[0],
-    dy = b[1] - a[1],
-    d = Math.max(0.01, Math.hypot(dx, dy)),
-    mid = Math.min(d / 2, length),
-    h = Math.sqrt(Math.max(0, length * length - mid * mid));
-  return [
-    a[0] + dx * 0.5 - (dy / d) * h * bend,
-    a[1] + dy * 0.5 + (dx / d) * h * bend,
-  ];
-}
 function limb(
   c: Ctx,
   points: number[],
@@ -217,21 +214,30 @@ function limb(
       points[i + 1] - (dx / length) * radius,
     ]);
   }
-  const pts = [...left, ...right.reverse()];
-  path(
-    c,
-    "M" + pts.map((pt) => pt.join(" ")).join("L") + "Z",
-    fill,
-    outline,
-    lineArt ? 1 : 0.65,
-  );
+  // Rounded contour at the elbow/knee, with a broad muscle and a narrow wrist/ankle.
+  const middle = (a: Point, b: Point): Point => [
+    (a[0] + b[0]) / 2,
+    (a[1] + b[1]) / 2,
+  ];
+  const coordinate = (p: Point) => p.join(" ");
+  const contour = `M${coordinate(left[0])}L${coordinate(middle(left[0], left[1]))}Q${coordinate(left[1])} ${coordinate(middle(left[1], left[2]))}L${coordinate(left[2])}Q${coordinate([points[4], points[5]])} ${coordinate(right[2])}L${coordinate(middle(right[2], right[1]))}Q${coordinate(right[1])} ${coordinate(middle(right[1], right[0]))}L${coordinate(right[0])}Z`;
+  path(c, contour, fill, outline, lineArt ? 1 : 0.65);
 }
-function shoe(c: Ctx, foot: Point, color: string, facing: number) {
-  path(
-    c,
-    `M${foot[0] - 5} ${foot[1] - 4}q8 -5 14 0l${facing * 8} 5q0 3 -10 3l-13 -1Z`,
-    color,
-  );
+function shoe(c: Ctx, foot: Point, knee: Point, color: string, facing: number) {
+  c.save();
+  c.translate(...foot);
+  if (foot[1] < 196)
+    c.rotate(
+      Math.max(
+        -1.45,
+        Math.min(
+          1.45,
+          Math.atan2(foot[1] - knee[1], foot[0] - knee[0]) - Math.PI / 2,
+        ),
+      ),
+    );
+  path(c, `M-5 -4q7 -3 11 0l${facing * 7} 4q1 4 -7 4l-12 -1Z`, color);
+  c.restore();
 }
 export function drawFigure(
   c: Ctx,
@@ -243,9 +249,27 @@ export function drawFigure(
   facing = 1,
   rotation = 0,
   alpha = 1,
+  shadowGround = ground,
 ) {
   c.save();
   c.globalAlpha *= alpha;
+  if (!costume.paperCut && !costume.lineArt) {
+    c.save();
+    c.globalAlpha *= 0.13;
+    c.fillStyle = "#27251f";
+    c.beginPath();
+    c.ellipse(
+      x + scale * (pose.leftFoot[0] + pose.rightFoot[0]) * 0.15,
+      shadowGround + 3 * scale,
+      43 * scale,
+      6 * scale,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    c.fill();
+    c.restore();
+  }
   c.translate(x, ground);
   c.rotate(rotation);
   // A turn changes the silhouette gently; it never collapses the actor to a line.
@@ -256,24 +280,41 @@ export function drawFigure(
     hip: Point = [0, pose.hipY],
     lh = pose.leftHand,
     rh = pose.rightHand;
-  const le = joint([sh[0] - 8, sh[1] + 1], lh, 38, 1),
-    re = joint([sh[0] + 8, sh[1] + 1], rh, 38, 1);
-  const lk = joint([-6, hip[1]], pose.leftFoot, 51, -1),
-    rk = joint([6, hip[1]], pose.rightFoot, 51, -1);
+  const {
+    leftElbow: le,
+    rightElbow: re,
+    leftKnee: lk,
+    rightKnee: rk,
+  } = jointsAt(pose);
   const outline = costume.outline ?? "rgba(45,35,27,.22)";
   c.save();
   c.globalAlpha *= costume.lineArt || costume.paperCut ? 1 : 0.96;
   limb(
     c,
     [-6, hip[1], lk[0], lk[1], ...pose.leftFoot],
-    costume.pants,
+    costume.shorts ? costume.skin : costume.pants,
     13,
     outline,
     costume.lineArt,
   );
+  if (costume.shorts)
+    limb(
+      c,
+      [
+        -6,
+        hip[1],
+        -6 + (lk[0] + 6) * 0.28,
+        hip[1] + (lk[1] - hip[1]) * 0.28,
+        -6 + (lk[0] + 6) * 0.57,
+        hip[1] + (lk[1] - hip[1]) * 0.57,
+      ],
+      costume.pants,
+      17,
+      outline,
+    );
   if (costume.stripe)
     line(c, [-6, hip[1], lk[0], lk[1], ...pose.leftFoot], costume.stripe, 2.2);
-  shoe(c, pose.leftFoot, costume.shoe, -1);
+  shoe(c, pose.leftFoot, lk, costume.shoe, -1);
   limb(
     c,
     [sh[0] - 8, sh[1], ...le, ...lh],
@@ -295,14 +336,29 @@ export function drawFigure(
   limb(
     c,
     [6, hip[1], rk[0], rk[1], ...pose.rightFoot],
-    costume.pants,
+    costume.shorts ? costume.skin : costume.pants,
     14,
     outline,
     costume.lineArt,
   );
+  if (costume.shorts)
+    limb(
+      c,
+      [
+        6,
+        hip[1],
+        6 + (rk[0] - 6) * 0.28,
+        hip[1] + (rk[1] - hip[1]) * 0.28,
+        6 + (rk[0] - 6) * 0.57,
+        hip[1] + (rk[1] - hip[1]) * 0.57,
+      ],
+      costume.pants,
+      17,
+      outline,
+    );
   if (costume.stripe)
     line(c, [6, hip[1], rk[0], rk[1], ...pose.rightFoot], costume.stripe, 2.2);
-  shoe(c, pose.rightFoot, costume.shoe, 1);
+  shoe(c, pose.rightFoot, rk, costume.shoe, 1);
   const bodyLength = Math.hypot(hip[0] - sh[0], hip[1] - sh[1]) || 1;
   const ux = (hip[0] - sh[0]) / bodyLength,
     uy = (hip[1] - sh[1]) / bodyLength;
@@ -310,8 +366,23 @@ export function drawFigure(
     ny = -ux;
   const at = (origin: Point, normal: number, along: number) =>
     `${origin[0] + nx * normal + ux * along} ${origin[1] + ny * normal + uy * along}`;
-  const body = `M${at(sh, -14, 0)}Q${at(sh, 0, -9)} ${at(sh, 14, 0)}C${at(sh, 15, 20)} ${at(hip, 12, -15)} ${at(hip, 12, 1)}Q${at(hip, 0, 8)} ${at(hip, -12, 1)}C${at(hip, -14, -15)} ${at(sh, -14, 20)} ${at(sh, -14, 0)}Z`;
+  const shoulderWidth = 12 + (pose.front ?? 0) * 4;
+  const waist: Point = [
+    sh[0] + (hip[0] - sh[0]) * 0.68,
+    sh[1] + (hip[1] - sh[1]) * 0.68,
+  ];
+  const body = `M${at(sh, -shoulderWidth, 0)}Q${at(sh, 0, -7)} ${at(sh, shoulderWidth, 0)}C${at(sh, shoulderWidth + 1, 16)} ${at(waist, 8.5, -12)} ${at(waist, 8.5, 0)}Q${at(hip, 13, -8)} ${at(hip, 11, 3)}Q${at(hip, 0, 7)} ${at(hip, -11, 3)}Q${at(hip, -13, -8)} ${at(waist, -8.5, 0)}C${at(waist, -8.5, -12)} ${at(sh, -shoulderWidth, 16)} ${at(sh, -shoulderWidth, 0)}Z`;
   path(c, body, costume.top, outline, 0.8);
+  if (costume.collar && !costume.lineArt && !costume.female) {
+    path(
+      c,
+      `M${at(sh, -5, -2)}L${at(sh, 0, 15)}L${at(sh, 6, -2)}L${at(sh, 0, 2)}Z`,
+      "#e8e3d1",
+      outline,
+      0.4,
+    );
+    line(c, [sh[0], sh[1] + 13, hip[0], hip[1] - 3], outline, 0.65);
+  }
   if (costume.female) {
     path(
       c,
@@ -352,10 +423,25 @@ export function drawFigure(
     6,
   );
   c.save();
-  c.translate(sh[0] - ux * 23, sh[1] - uy * 23);
-  c.rotate(pose.head + Math.atan2(uy, ux) - Math.PI / 2);
-  c.scale(costume.paperCut ? 0.9 : 0.73, costume.paperCut ? 0.9 : 0.73);
+  const headOffset = costume.paperCut ? 23 : 17.5;
+  c.translate(sh[0] - ux * headOffset, sh[1] - uy * headOffset);
+  c.rotate(pose.head);
+  c.scale(costume.paperCut ? 0.9 : 0.95, costume.paperCut ? 0.9 : 0.95);
   if (costume.paperCut) {
+    const front = pose.front ?? 0;
+    c.save();
+    c.globalAlpha *= 1 - front;
+    path(
+      c,
+      "M-12 -11Q-12 -24 2 -23Q15 -20 13 -8L18 -1L13 2L12 8L3 16L-5 12L-9 3Z",
+      costume.skin,
+    );
+    line(c, [5, -4, 11, -3], "#f6ddb0", 1.1);
+    line(c, [8, 7, 13, 7], "#f6ddb0", 1);
+    line(c, [-7, -7, -5, 5], "#f6ddb0", 0.8);
+    c.restore();
+    c.save();
+    c.globalAlpha *= front;
     path(
       c,
       "M-15 -11Q-17 -23 0 -23Q17 -23 16 -10L14 8Q9 20 0 22Q-9 20 -14 8Z",
@@ -366,7 +452,11 @@ export function drawFigure(
     line(c, [-8, 3, -3, 3], "#f6ddb0", 1.3);
     line(c, [3, 3, 8, 3], "#f6ddb0", 1.3);
     line(c, [-4, 13, 5, 13], "#f6ddb0", 1);
+    c.restore();
   } else {
+    const front = pose.front ?? 0;
+    c.save();
+    c.globalAlpha *= 1 - front;
     path(
       c,
       "M-9 -12Q-8 -22 4 -21Q13 -19 12 -10L12 -6L17 -1L13 1L12 7L5 12L-3 10L-7 4Z",
@@ -387,6 +477,41 @@ export function drawFigure(
     line(c, [8, 5, 12, 5], costume.hair, 0.55);
     if (costume.glasses) path(c, "M0 -8L13 -7L12 -1L3 0Z", costume.hair);
     if (costume.mask) path(c, "M-2 -9L14 -8L14 -2L1 -1Z", "#080f12");
+    if (costume.hat)
+      path(
+        c,
+        "M-17 -13L19 -13L17 -16L11 -16L9 -26L-10 -26L-13 -17L-17 -16Z",
+        costume.hair,
+      );
+    c.restore();
+    if (front > 0) {
+      c.save();
+      c.globalAlpha *= front;
+      path(
+        c,
+        "M-12 -12Q-11 -24 1 -23Q15 -22 13 -10L12 5Q8 15 0 16Q-9 13 -12 4Z",
+        costume.skin,
+        outline,
+        0.6,
+      );
+      if (!costume.bald)
+        path(
+          c,
+          "M-12 1Q-18 -13 -8 -22Q4 -29 14 -18L13 -9L7 -13L-1 -11L-8 -13L-9 1Z",
+          costume.hair,
+          outline,
+          0.6,
+        );
+      line(c, [-8, -3, -3, -4], costume.hair, 0.7);
+      line(c, [3, -4, 8, -3], costume.hair, 0.7);
+      line(c, [0, -1, -1, 5, 2, 5], outline, 0.6);
+      line(c, [-3, 10, 4, 10], costume.hair, 0.55);
+      if (costume.mask || costume.glasses)
+        path(c, "M-11 -6L11 -6L9 1L-9 1Z", costume.hair);
+      if (costume.hat)
+        path(c, "M-18 -13L18 -13L11 -17L9 -26L-10 -26L-12 -17Z", costume.hair);
+      c.restore();
+    }
   }
   c.restore();
   if (costume.paperCut) {

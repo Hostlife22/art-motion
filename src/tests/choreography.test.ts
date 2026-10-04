@@ -4,6 +4,7 @@ import {
   performanceAt,
   pushUpAt,
 } from "../animation/choreography";
+import { jointsAt } from "../animation/poses";
 import camera from "../animation/referenceCamera.json";
 import { installCameraTrack, cameraAt, sceneTime } from "../animation/timeline";
 
@@ -35,6 +36,7 @@ describe("native scene performances", () => {
           sample.pose.hipY,
           sample.pose.turn,
           sample.pose.head,
+          ...Object.values(jointsAt(sample.pose)).flat(),
           ...sample.pose.leftHand,
           ...sample.pose.rightHand,
           ...sample.pose.leftFoot,
@@ -54,12 +56,29 @@ describe("native scene performances", () => {
     }
     expect(motions.size).toBe(20);
   });
-  it("push-ups preserve hand and foot contacts while lowering the body", () => {
+  it("one-arm push-ups preserve the supporting hand and feet while lowering the body", () => {
     const up = pushUpAt(0),
       down = pushUpAt(1 / 6);
     expect(down.hipY).toBeGreaterThan(up.hipY);
     expect(Math.abs(down.rightHand[0] - up.rightHand[0])).toBeLessThan(2);
     expect(Math.abs(down.leftFoot[0] - up.leftFoot[0])).toBeLessThan(3);
     expect(up.leftFoot[1]).toBeGreaterThan(up.hipY);
+    expect(up.leftHand[1]).toBeLessThan(up.rightHand[1] - 40);
+  });
+  it("keeps the school demonstration planted and ends with a frontal salute", () => {
+    for (const phase of [0.27, 0.36, 0.45, 0.52]) {
+      const { pose } = performanceAt(8, phase);
+      expect(pose.leftFoot[1]).toBe(205);
+      expect(pose.rightFoot[1]).toBe(205);
+    }
+    expect(performanceAt(8, 0.83).pose.front).toBe(1);
+  });
+  it("keeps late jumps and the statue transition in their observed order", () => {
+    expect(performanceAt(6, 0.36).y).toBeLessThan(performanceAt(6, 0.45).y);
+    expect(performanceAt(12, 0.55).y).toBeLessThan(performanceAt(12, 0.64).y);
+    expect(performanceAt(19, 0.55).y).toBeGreaterThan(
+      performanceAt(19, 0.84).y,
+    );
+    expect(performanceAt(19, 0.84).pose).toEqual(performanceAt(19, 0.95).pose);
   });
 });

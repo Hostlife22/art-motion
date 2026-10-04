@@ -1,8 +1,4 @@
-import {
-  choreography,
-  performanceAt,
-  pushUpAt,
-} from "../animation/choreography";
+import { choreography, performanceAt } from "../animation/choreography";
 import { blend, poseAt, poses, type Pose } from "../animation/poses";
 import { clamp, mix, smooth, SCENE_DURATION } from "../animation/timeline";
 import {
@@ -50,6 +46,10 @@ const white: Costume = {
   shoe: "#d4c1a1",
 };
 const sequences = choreography;
+const sceneFloors = [
+  434, 434, 439, 440, 455, 402, 407, 447, 441, 408, 447, 451, 449, 357, 450,
+  444, 446, 439, 446, 450,
+];
 function fall(
   c: Ctx,
   x: number,
@@ -341,7 +341,7 @@ function fireworks(c: Ctx, time: number) {
   }
 }
 function pedestal(c: Ctx, phase: number) {
-  const amount = smooth((phase - 0.4) / 0.2);
+  const amount = smooth((phase - 0.77) / 0.06);
   if (!amount) return;
   rect(c, 196, 426, 104, 56 * amount, "#6d767b");
   rect(c, 190, 419, 115, 8, "#8b959b");
@@ -427,38 +427,53 @@ export class SceneRenderer {
           t * 4 + j,
           "#3d4a36",
         );
-      drawFigure(
-        c,
-        367,
-        442,
-        phase < 0.47
-          ? poseAt(
-              [
-                [0, "ready"],
-                [0.4, "punch"],
-                [0.7, "recoil"],
-                [1, "guard"],
-              ],
-              phase,
-            )
-          : poses.guard,
-        { ...opponent, top: "#85794c", pants: "#263e38" },
-        0.98,
-        -1,
-      );
-      if (phase > 0.65 && phase < 0.78) {
+      if (phase < 0.36)
         drawFigure(
           c,
-          x,
-          408,
-          poses.fall,
-          costumes[index],
-          scale,
-          1,
-          -Math.PI * (phase - 0.65) * 8,
+          350,
+          439,
+          poseAt(
+            [
+              [0, "ready"],
+              [0.17, "ready"],
+              [0.27, "recoil"],
+              [0.36, "victory"],
+              [1, "ready"],
+            ],
+            phase,
+          ),
+          { ...opponent, top: "#343732", pants: "#26312d" },
+          1.1,
+          -1,
         );
-        return;
-      }
+      else if (phase < 0.59)
+        fall(
+          c,
+          331,
+          439,
+          (phase - 0.36) / 0.1,
+          { ...opponent, top: "#343732", pants: "#26312d" },
+          1.1,
+        );
+      else if (phase < 0.72)
+        drawFigure(
+          c,
+          161,
+          439,
+          { ...poses.low, leftHand: [60, 65], rightHand: [55, 86] },
+          opponent,
+          1.1,
+        );
+      else
+        drawFigure(
+          c,
+          348,
+          439,
+          { ...poses.guard, leftHand: [-5, 145], rightHand: [18, 146] },
+          opponent,
+          1.1,
+          -1,
+        );
     }
     if (index === 3)
       drawFigure(
@@ -468,10 +483,15 @@ export class SceneRenderer {
         poseAt(
           [
             [0, "guard"],
-            [0.28, "block"],
-            [0.55, "punch"],
-            [0.8, "recoil"],
-            [1, "salute"],
+            [0.27, { ...poses.ready, rightHand: [61, 60], leftHand: [31, 53] }],
+            [0.45, { ...poses.ready, leftHand: [47, 75], rightHand: [65, 51] }],
+            [0.55, "recoil"],
+            [0.64, { ...poses.salute, front: 1 }],
+            [
+              0.74,
+              { ...poses.guard, leftHand: [-8, 144], rightHand: [12, 146] },
+            ],
+            [1, { ...poses.guard, leftHand: [-8, 144], rightHand: [12, 146] }],
           ],
           phase,
         ),
@@ -483,16 +503,59 @@ export class SceneRenderer {
       mirrorBall(c, t);
       drawFigure(
         c,
-        314 + Math.sin(phase * Math.PI * 4) * 24,
+        310 + Math.sin(phase * Math.PI * 2) * 8,
         458,
         poseAt(
           [
-            [0, "danceStep"],
-            [0.2, "dance"],
-            [0.42, "spin"],
-            [0.65, "dance"],
-            [0.85, "danceStep"],
-            [1, "open"],
+            [0, { ...poses.dance, rightHand: [58, 20], leftHand: [63, 56] }],
+            [
+              0.17,
+              {
+                ...poses.dance,
+                leftHand: [64, 50],
+                rightHand: [57, 8],
+                leftElbow: [33, 61],
+                rightElbow: [27, 29],
+              },
+            ],
+            [
+              0.55,
+              {
+                ...poses.dance,
+                leftHand: [69, 43],
+                rightHand: [53, 8],
+                leftElbow: [34, 53],
+                rightElbow: [29, 27],
+              },
+            ],
+            [
+              0.64,
+              {
+                ...poses.dance,
+                front: 1,
+                leftHand: [-30, 66],
+                rightHand: [48, 42],
+              },
+            ],
+            [
+              0.74,
+              {
+                ...poses.dance,
+                lean: -17,
+                leftHand: [-42, 34],
+                rightHand: [75, 28],
+              },
+            ],
+            [
+              0.84,
+              {
+                ...poses.dance,
+                lean: 19,
+                leftHand: [-35, 32],
+                rightHand: [62, 26],
+              },
+            ],
+            [1, "dance"],
           ],
           phase,
         ),
@@ -500,7 +563,7 @@ export class SceneRenderer {
         0.94,
         -1,
       );
-      if (phase > 0.6) {
+      if (phase > 0.78) {
         path(
           c,
           "M65 70L435 70L421 100L435 132L65 132L78 100Z",
@@ -521,7 +584,7 @@ export class SceneRenderer {
       }
     }
     if (index === 5) {
-      if (phase < 0.64)
+      if (phase < 0.54)
         drawFigure(
           c,
           264,
@@ -546,22 +609,14 @@ export class SceneRenderer {
           c,
           260,
           402,
-          (phase - 0.64) * 6,
+          (phase - 0.54) * 6,
           { ...costumes[5], pants: "#5c6b58" },
           0.78,
         );
-      if (phase > 0.74) {
-        drawFigure(
-          c,
-          217,
-          402,
-          poses.victory,
-          { ...costumes[5], top: "#d9dbc6", pants: "#7c8575" },
-          0.76,
-        );
+      if (phase > 0.61) {
         text(
           c,
-          String(Math.min(10, Math.floor((phase - 0.74) * 36) + 1)),
+          String(Math.min(10, Math.floor((phase - 0.61) * 36) + 1)),
           288,
           245,
           22,
@@ -609,40 +664,62 @@ export class SceneRenderer {
     if (index === 8) {
       c.save();
       c.translate(74, 167);
-      c.rotate(Math.sin(t * 2.5) * 0.08);
+      c.rotate(
+        phase > 0.6 && phase < 0.78
+          ? -Math.sin(((phase - 0.6) / 0.18) * Math.PI) * 0.22
+          : 0,
+      );
       line(c, [0, -24, 0, 1], "#343b2b", 1);
       path(c, "M-21 6Q0 -1 21 6L21 144Q0 156 -21 144Z", "#2e3a2e");
       rect(c, -22, 82, 44, 18, "#b93730");
       c.restore();
+      const pupilPositions = [
+        [309, 403, 0.72],
+        [399, 397, 0.74],
+        [459, 430, 0.82],
+      ];
       for (let j = 0; j < 3; j++) {
-        const p = poseAt(sequences[8], clamp(phase - j * 0.065));
+        const pupil = poseAt(sequences[8], clamp(phase - j * 0.035));
+        const target = {
+          ...pupil,
+          rightHand: [pupil.rightHand[0] * 0.89, pupil.rightHand[1]] as [
+            number,
+            number,
+          ],
+        };
         drawFigure(
           c,
-          305 + j * 62,
-          441 - j * 3,
-          p,
+          pupilPositions[j][0],
+          pupilPositions[j][1],
+          target,
           { ...costumes[8], skin: "#d9b589", top: "#eee7cb", pants: "#3e473a" },
-          0.66,
+          pupilPositions[j][2],
+          -1,
         );
       }
     }
     if (index === 9) {
       const reaction = smooth((phase - 0.64) / 0.16);
       if (phase > 0.7)
-        fall(c, 317, 397, reaction, { ...costumes[9], top: "#293129" }, 0.82);
+        fall(c, 330, 408, reaction, { ...costumes[9], top: "#293129" }, 0.95);
       else
         drawFigure(
           c,
-          347,
-          397,
-          poses.salute,
+          330,
+          408,
+          { ...poses.guard, leftHand: [-5, 145], rightHand: [12, 147] },
           { ...costumes[9], top: "#293129" },
-          0.82,
+          0.95,
           -1,
         );
-      if (phase > 0.68 && phase < 0.83) {
+      if (phase > 0.8 && phase < 0.88)
         burst(c, 353, 259, 30, "BAM!", "#f2e1b4");
-        for (let j = 0; j < 3; j++) {
+      if (phase > 0.35) {
+        for (
+          let j = 0;
+          j < Math.min(3, Math.floor((phase - 0.35) / 0.09) + 1);
+          j++
+        ) {
           circle(c, 67 + j * 44, 251, 13, "", "#aa3d2a", 1.4);
           text(
             c,
@@ -656,17 +733,6 @@ export class SceneRenderer {
             "center",
           );
         }
-      }
-      if (phase > 0.25 && phase < 0.59) {
-        drawFigure(
-          c,
-          240,
-          445,
-          pushUpAt((phase - 0.25) / 0.34),
-          costumes[9],
-          0.89,
-        );
-        return;
       }
     }
     if (index === 10) {
@@ -850,6 +916,7 @@ export class SceneRenderer {
       const health = 1 - smooth((phase - 0.24) / 0.44);
       rect(c, 292 + 184 * health, 16, 184 * (1 - health), 13, "#b73236");
       const giant: Costume = {
+        sleeves: true,
         bald: true,
         glasses: true,
         skin: "#765d40",
@@ -858,28 +925,59 @@ export class SceneRenderer {
         pants: "#1b2530",
         shoe: "#e7e9dc",
       };
-      if (phase < 0.6)
+      if (phase < 0.52)
         drawFigure(
           c,
-          349,
-          428,
+          386,
+          435,
           poseAt(
             [
-              [0, { ...poses.ready, leftHand: [21, 21], rightHand: [45, 16] }],
-              [0.32, "block"],
-              [0.47, "kick"],
-              [0.59, "ready"],
+              [0, { ...poses.ready, leftHand: [23, 37], rightHand: [57, 47] }],
+              [
+                0.27,
+                { ...poses.ready, leftHand: [20, 37], rightHand: [58, 51] },
+              ],
+              [
+                0.36,
+                {
+                  ...poses.victory,
+                  lean: -32,
+                  leftHand: [-18, -35],
+                  rightHand: [-34, -42],
+                  leftElbow: [-16, 5],
+                  rightElbow: [-30, 0],
+                  leftFoot: [-73, 198],
+                  leftKnee: [-31, 154],
+                  rightFoot: [20, 205],
+                  rightKnee: [29, 159],
+                },
+              ],
+              [0.45, { ...poses.punch, rightHand: [100, 65] }],
+              [0.52, "recoil"],
               [1, "recoil"],
             ],
             phase,
           ),
           giant,
-          1.35,
+          1.58,
           -1,
         );
-      else fall(c, 349, 428, clamp((phase - 0.6) * 5), giant, 1.35);
+      else if (phase < 0.74) {
+        const flight = clamp((phase - 0.52) / 0.22);
+        drawFigure(
+          c,
+          366 + flight * 95,
+          435 - Math.sin(flight * Math.PI) * 155,
+          { ...poses.recoil, leftHand: [-32, -30], rightHand: [21, -43] },
+          giant,
+          1.58,
+          -1,
+          -flight * 0.7,
+        );
+      } else fall(c, 405, 435, 1, giant, 1.58);
       if (phase > 0.3 && phase < 0.4) impact(c, 250, 301, (phase - 0.3) * 10);
-      if (phase > 0.6 && phase < 0.74) impact(c, 292, 260, (phase - 0.6) * 7);
+      if (phase > 0.53 && phase < 0.63)
+        impact(c, 292, 260, (phase - 0.53) * 10);
       if (phase > 0.74) {
         text(c, "K.O.", 253, 241, 64, "#142020", "monospace", "bold", "center");
         text(c, "K.O.", 250, 238, 64, "#e5bf42", "monospace", "bold", "center");
@@ -900,8 +998,18 @@ export class SceneRenderer {
     }
     if (index === 18) {
       for (let j = 0; j < 4; j++)
-        drawFigure(c, 40 + j * 113, 437, pose, costumes[18], 0.62, 1, 0, 0.18);
-      const progress = clamp((phase - 0.5) * 5);
+        drawFigure(
+          c,
+          40 + j * 113,
+          437,
+          pose,
+          costumes[18],
+          0.68,
+          j % 2 ? -1 : 1,
+          0,
+          0.18,
+        );
+      const progress = clamp((phase - 0.68) * 7);
       if (progress > 0)
         fall(
           c,
@@ -916,13 +1024,19 @@ export class SceneRenderer {
           c,
           362,
           437,
-          poses.ready,
+          {
+            ...poses.ready,
+            rightHand: [73, 53],
+            leftHand: [43, 55],
+            rightElbow: [43, 58],
+            leftElbow: [20, 79],
+          },
           { ...white, bald: true, hair: "#9b9576" },
           1,
           -1,
         );
-      if (phase > 0.47) {
-        cracks(c, smooth((phase - 0.47) / 0.15));
+      if (phase > 0.59) {
+        cracks(c, smooth((phase - 0.59) / 0.15));
         dust(c, clamp((phase - 0.48) * 2), 250, 263, "#d3e1db", 48);
       }
     }
@@ -947,7 +1061,7 @@ export class SceneRenderer {
         line(c, [xx, yy, xx - 2, yy + 8], "#a1b1c6", 0.5);
       }
       c.restore();
-      if (phase > 0.35) {
+      if (phase > 0.79) {
         const bronze: Costume = {
           skin: "#bd9952",
           hair: "#68502c",
@@ -961,9 +1075,18 @@ export class SceneRenderer {
       }
     }
     if (!showHero) return;
-    if (index === 5 && phase > 0.82)
-      drawFigure(c, x, y, poses.victory, costumes[index], scale);
-    else drawFigure(c, x, y, pose, costumes[index], scale);
+    drawFigure(
+      c,
+      x,
+      y,
+      pose,
+      costumes[index],
+      scale,
+      1,
+      0,
+      1,
+      sceneFloors[index],
+    );
     if (index === 0) {
       const r = random(90);
       c.save();

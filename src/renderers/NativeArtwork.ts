@@ -5,8 +5,8 @@ import { rasterQuality, rasterSize } from "./rasterQuality";
 import type { Ctx } from "./draw";
 
 const previewPhases = [
-  0.34, 0.3, 0.3, 0.4, 0.32, 0.42, 0.28, 0.42, 0.4, 0.2, 0.45, 0.38, 0.5, 0.72,
-  0.46, 0.32, 0.43, 0.54, 0.56, 0.8,
+  0.34, 0.3, 0.3, 0.4, 0.32, 0.42, 0.28, 0.42, 0.4, 0.36, 0.45, 0.38, 0.5, 0.72,
+  0.46, 0.32, 0.43, 0.27, 0.56, 0.8,
 ];
 /** Every mark and actor is drawn by code; caches contain our own static backgrounds only. */
 export class NativeArtwork {
