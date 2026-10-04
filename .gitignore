@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+playwright-report/
+test-results/
+docs/reference/frames/
+ssstwitter.com_*.mp4
