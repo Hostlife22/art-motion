@@ -1,16 +1,12 @@
 # art-motion
 
-**Turn art styles, ideas and narration into animated scenes.**
-
-art-motion is a skill for coding agents and a portable HTML Canvas animation toolkit. It includes working demos, reusable drawing libraries and guides for building art films, explainers and character animations.
+Create art films, explainers and character animations with a coding agent or directly in HTML Canvas. art-motion includes working demos, reusable drawing libraries and guides for planning, animating and rendering scenes.
 
 **35 art styles · 9 explainer grammars · 8 configurable clip formats**
 
 <img src="assets/showcase/hero.png" alt="art-motion: animated art styles, from Egyptian murals to pixel worlds" width="100%" />
 
 [Quick start](#quick-start) · [Meet Milo](#meet-milo) · [Art styles](#art-styles) · [Explainer formats](#explainer-formats) · [Documentation](#documentation)
-
-[Contributing](CONTRIBUTING.md) · [MIT license](LICENSE) · [Security](SECURITY.md) · [Accessibility](ACCESSIBILITY.md)
 
 ## Quick start
 
@@ -22,19 +18,15 @@ Install the skill:
 npx skills add Hostlife22/art-motion
 ```
 
-Then give your agent a concrete brief. For example:
+Give your agent a brief:
 
 > Use art-motion to create a 15-second animation of Milo walking through a Monet-inspired garden. Include moving water, a stone-skipping action and a slow camera move.
 
-> Use art-motion to turn this narration into an explainer. Choose a visual format for each shot and leave room for subtitles.
+The [skill](SKILL.md) guides scene planning, style selection, animation, rendering and quality checks. You can also use it to turn narration into an explainer or analyze a reference animation.
 
-> Use art-motion to break down this reference animation: identify its cuts, motion, transitions and beat grid, then apply those mechanics to a new subject.
+### Preview and render locally
 
-The skill guides the agent through scene planning, style selection, frame design, animation and quality checks. Read [SKILL.md](SKILL.md) for the production workflow.
-
-### Run the included demos
-
-You need [uv](https://docs.astral.sh/uv/), FFmpeg on your PATH and Playwright Chromium.
+Install [uv](https://docs.astral.sh/uv/) and FFmpeg, then clone the repository and install Chromium:
 
 ```sh
 git clone https://github.com/Hostlife22/art-motion.git
@@ -42,7 +34,7 @@ cd art-motion
 uv run --with playwright playwright install chromium
 ```
 
-For an interactive browser preview, start a local server:
+Start the preview server:
 
 ```sh
 uv run python -m http.server 8000 --bind 127.0.0.1 --directory scripts/engine
@@ -57,7 +49,7 @@ Open a demo:
 | Egyptian, Monet and pixel worlds | [Long-scroll film](http://127.0.0.1:8000/index.html?film=demos/long_scroll)         |
 | Animated collage explainer       | [Vox demo](http://127.0.0.1:8000/index.html?film=demos/y2_vox)                      |
 
-For your first export, render a Van Gogh-style still or the complete Milo adventure. Run these commands from the repository root:
+Export a still or video from the repository root:
 
 ```sh
 uv run --with playwright python scripts/engine/render.py --solo 09_postimp --stills 0.3 --out renders/van-gogh
@@ -68,9 +60,7 @@ The renderer starts its own local server. Stills are saved as PNG; video exports
 
 ## Meet Milo
 
-Milo is a young traveler with dark brown curls, a yellow jacket and a small teal backpack. His gestures and reactions carry the story while his rendering changes to match each world.
-
-Canvas draws the scenery, props, camera movement and transitions. Milo uses generated sprite frames in the showcase films, with procedural alternatives in the explainer demos.
+Milo is a young traveler with dark curls, a yellow jacket and a small teal backpack. Watch him move through paintings and pixel worlds; each scene adapts his appearance to its art style.
 
 ### A walk through paintings
 
@@ -107,7 +97,7 @@ An 18.5-second demo with a subscription-choice joke, a stomp-and-kick combo and 
 
 <img src="assets/characters/milo-character-comparison.jpg" alt="Milo in Kurzgesagt, Vox and whiteboard scenes: procedural geometry and generated sprites" width="100%" />
 
-The top row uses code-drawn geometry; the bottom row uses generated sprites. Both are rendered from the working demos. The [character guide](references/10-characters.md) explains the approaches; [Milo's asset notes](assets/characters/milo/README.md) include his identity, generation prompts and rebuild commands.
+Milo uses generated sprites in the showcase films and procedural alternatives in the explainer demos. The comparison shows code-drawn geometry above and generated sprites below, rendered from the working demos. The [character guide](references/10-characters.md) explains the approaches; [Milo's asset notes](assets/characters/milo/README.md) include his identity, generation prompts and rebuild commands.
 
 </details>
 
@@ -150,7 +140,7 @@ To export a configurable clip, edit an example JSON and render it:
 uv run --with playwright python scripts/engine/render.py --spec scripts/engine/examples/t3_finance_chart.json --out renders/finance-chart.mp4
 ```
 
-Specifications control duration, dimensions, frame rate, content and timed cues. Landscape and portrait output are supported. Clips render exactly `round(duration × fps)` frames; add `--alpha` and use a `.mov` output path for transparent ProRes 4444.
+Specifications control duration, dimensions, frame rate, content and timed cues. Export landscape or portrait video, or add `--alpha` with a `.mov` output path for transparent ProRes 4444.
 
 See the [clip contract and grammar guide](references/09-video-animation-grammars.md) for the full specification.
 
@@ -160,7 +150,10 @@ Copy `scripts/engine/` into your project. Edit `eras.js` to define the sequence,
 
 For narration, start with a shot list and timed cues. Choose a visual grammar for each explanation, design the frames, then animate and export the visual track. Add a soundtrack to a film with `render.py --audio music.wav`.
 
-Before delivery, run the quality checks:
+<details>
+<summary>Check your animation before exporting</summary>
+
+Run the quality checks:
 
 ```sh
 uv run scripts/qa.py --project scripts/engine --film demos/milo_pixel_adventure --out renders/qa-milo
@@ -168,6 +161,8 @@ uv run scripts/qa.py --spec scripts/engine/examples/t3_finance_chart.json --out 
 ```
 
 QA reports determinism, render cost, motion, smoothness and text framing. Review the resulting frames and film alongside the measurements; deliberate pauses and stylistic flicker need visual judgment. For films with light, untextured backgrounds, `scripts/subzone_gate.py` checks whether graphics enter the subtitle area.
+
+</details>
 
 ## Documentation
 
@@ -185,6 +180,9 @@ QA reports determinism, render cost, motion, smoothness and text framing. Review
 | [Narrated-film references](scripts/engine/reference_films/spacex/README.md) | Full-film code snapshots and required external assets    |
 | [Asset rebuilding](assets/localization/README.md)                           | English captions, image generation and overview builders |
 
+<details>
+<summary>Repository layout</summary>
+
 ```text
 art-motion/
 ├── SKILL.md                    # Instructions for coding agents
@@ -200,20 +198,16 @@ art-motion/
     └── install_milo_sprites.py # Sprite extraction and foot-anchor metadata
 ```
 
-## Contributing
+</details>
 
-Help improve scenes, explainer formats, documentation or accessibility. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, project conventions and validation before a pull request.
+## Project information
 
-GitHub Actions validates changes and publishes a release when a tag is pushed. Releases include ZIP and tar.gz packages with SHA-256 checksums. See the [release instructions](CONTRIBUTING.md#releases).
+| Resource | Details |
+| --- | --- |
+| [Contributing](CONTRIBUTING.md) | Setup, project conventions and validation before a pull request |
+| [Releases](https://github.com/Hostlife22/art-motion/releases) | Source ZIP and tar.gz archives with SHA-256 checksums; [tag-based publishing](CONTRIBUTING.md#releases) |
+| [MIT license](LICENSE) | Maintained by [Hostlife22](https://github.com/Hostlife22); retained upstream code has [third-party notices](THIRD_PARTY_NOTICES.md) |
+| [Security](SECURITY.md) | Vulnerability reporting, supported code and local execution |
+| [Accessibility](ACCESSIBILITY.md) | Current support, known limitations and contribution guidance |
 
-## MIT license
-
-art-motion is maintained by [Hostlife22](https://github.com/Hostlife22) and distributed under the [MIT license](LICENSE). Retained upstream code is covered by [third-party notices](THIRD_PARTY_NOTICES.md). Bundled fonts retain their [own license notices](scripts/engine/lib/fonts/LICENSES.md); the reference-film documentation includes a separate [third-party stroke-data notice](scripts/engine/reference_films/spacex/README.md#third-party-stroke-data).
-
-## Security
-
-See [SECURITY.md](SECURITY.md) for supported code, private vulnerability reporting and the local toolkit's trust model.
-
-## Accessibility
-
-See [ACCESSIBILITY.md](ACCESSIBILITY.md) for current support, known limitations, still-viewing options and contribution guidance.
+Bundled fonts retain their [own licenses](scripts/engine/lib/fonts/LICENSES.md). The reference-film documentation includes a [third-party stroke-data notice](scripts/engine/reference_films/spacex/README.md#third-party-stroke-data).
