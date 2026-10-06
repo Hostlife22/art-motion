@@ -1,1 +1,0 @@
-reference-soundtrack.m4a is the original AAC stream extracted without re-encoding from the local user-provided reference video ssstwitter.com_1791105709702.mp4. It is synchronized to the visual timeline for local reference reconstruction. The project code license does not license the recording.
