@@ -1,0 +1,14 @@
+{
+  "grammar": "y2_vox",
+  "duration": 9,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "cues": [
+    { "at": 0.0, "kind": "title", "text": "These charts are drawn with code" },
+    { "at": 1.6, "kind": "image", "image": "assets/candlestick-landscape.png", "text": "Daily candlesticks · illustrative data" },
+    { "at": 3.4, "kind": "highlight", "data": { "rect": [0.74, 0.22, 0.22, 0.11] } },
+    { "at": 5.6, "kind": "point", "text": "The final candle reveals the closing price" },
+    { "at": 7.0, "kind": "image", "image": "assets/revenue-portrait.png", "text": "The same chart, adapted for portrait" }
+  ]
+}

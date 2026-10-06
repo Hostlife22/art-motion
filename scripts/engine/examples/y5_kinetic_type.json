@@ -1,0 +1,52 @@
+{
+  "grammar": "y5_kinetic_type",
+  "duration": 8,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "cues": [
+    {
+      "at": 0.0,
+      "kind": "title",
+      "text": "AI writing code",
+      "sub": "three stages of"
+    },
+    {
+      "at": 1.9,
+      "kind": "point",
+      "text": "Autocomplete",
+      "sub": "It fills the next line",
+      "data": {
+        "label": "Stage 01",
+        "key": "next line"
+      }
+    },
+    {
+      "at": 3.6,
+      "kind": "point",
+      "text": "Chat",
+      "sub": "Change one sentence to a whole paragraph",
+      "data": {
+        "label": "Stage 02",
+        "key": "a whole paragraph"
+      }
+    },
+    {
+      "at": 5.3,
+      "kind": "point",
+      "text": "Agent",
+      "sub": "You just say what you want",
+      "data": {
+        "label": "Stage 03",
+        "key": "What do you want?"
+      }
+    },
+    {
+      "at": 6.4,
+      "kind": "highlight",
+      "data": {
+        "word": "Agent"
+      }
+    }
+  ]
+}

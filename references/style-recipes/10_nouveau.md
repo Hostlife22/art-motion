@@ -1,0 +1,31 @@
+# 10_nouveau · 1896 Art Nouveau (Mucha poster)
+
+File: `scenes/10_nouveau.js` (~300 lines). Performance: warm average 29ms, maximum 37ms, first frame (cache creation) ≈80ms; deterministic pass (the same lt is the same pixel-by-pixel twice); lt 0.35→0.65 motion difference 13.1% pixels. The film stays for 0.70s (T09 organic wave transition 0.24s, growing out of (1330,320) = Maiden Halo).
+
+## Pipeline
+1. **Full cache of base plate `nv_bg`**: gray green → beige → peach three-stage vertical gradient (`#b9cba0` → `#cfd3a6` → `#ecc9a2`, only inner frame 34..1886×32..907); polka dot pattern = ring r10 + center point r2.6, line spacing 54, column spacing 62, odd rows are wrong 31 (diamond interlaced), color `rgba(120,140,100,.38)`; 240×135 fbm thumbnail enlargement α0.5 stacked stone plate mottled (hundreds of times faster than full screen noise calculation); mosaic floor tiles with 20×24 grid, 9 color cycle `(k*7+(k>>2))%9` scattered; green banner `#8fac80`; title `Marcellus-400` 76px, letterSpacing 12. First stroke with 7px dark brown and then fill with milky white; gold frame = outer 6px gold `#c9a24a` + inner and outer two 2px dark brown.
+2. **Variable line width path `ribbon(pts, w(q))`**: The point sequence is first Catmull-Rom encrypted (4-10 points per segment), and each point is offset w/2 along both sides of the normal line to form a closed polygon fill. All "whip threads" are it: stems, leaves, wrought iron table legs, banner scrolls, hair, heat. `swellW(wmax)` = thick at both ends (sin envelope), this is the thickness of Mucha's lines. Spiral ending `spiral(cx,cy,r0,a0,turns,dir)`: Radius received linearly by 15%.
+3. **Mucha style "thick outer outline, thin inner line" - overall silhouette dislocation method**: characters (cat + girl + hair + silk) are all drawn into the off-screen layer L (both mode of RIG, lw 2 → inner lines are blocked correctly in the order of parts); then copy L and dye it dark brown with `source-in` `#4e3320`, and press on the main canvas The three offset pads (-1.5,-1.5), (3.5,4.5), and (2,2.5) are under L. Result: Silhouette has a 1.5px outer edge and a 4–5px thick edge on the lower right side; the inner line remains 2px. Only 3 more full screen drawImages.
+4. Grain `P.grain('nv', .05, warm brown, .14)` covers the top layer, like lithography.
+
+## Motif animation (visible within 0.7s)
+- **Sunrise**: measured as the original film (509 frames (583,400) → 530 frames (576,299), ≈-5px/frame) is written as `sy = 400 - (lt-0.267)·288`, `sx = 583 - (lt-0.267)·20`, lt=0 at 477 (hidden behind the mountain), lt=0.7 to 275. The hill ribbon is painted behind the sun = natural occlusion "rising from behind the hill".
+- **Lead bar light rotation**: 14 radiating lead bars rotate slowly from the heliocenter r92→r420 at the angle `+lt·0.9·0.25` with ±0.04 swing; the lead bars move with the sun, so the entire window glass division is changing - this is the most conspicuous movement in the window.
+- **Stained glass edge**: Place a 14×14 color piece every 17px along the inner edge of the arch (straight edge + elliptical arc rx219 ry130), rotate according to tangent, 6-color cycle.
+- **Poppy/Lily Swing**: The horizontal displacement of the flower head is `sin(7.5t+φ)·13 + sin(3.1t+2φ)·5`, the stem is a ribbon, and the three control point curve only pushes the upper section; the left and right clusters are in opposite phase; the leaves are 0.3 times the amplitude.
+- **Halo rotation**: Girl halo R172, 18 round nails `+0.9t` rotation, inner ring 32 rose window petals `-0.63t` inversion; cat halo R106 eight-petal orange flower `-1.1t` + golden dotted line ring lineDashOffset go.
+- **Hair**: First a large hair ball (16 points smooth, the outer edge fluctuates according to `sin(6t+y·0.035)·9`), then 7 locks of back curls + 2 locks of front shoulder curls: 12 points of S curve `sin(7.4q+φ-7t)·(6+20q)` for each lock (traveling waves are passed down), 1.2 turns of spirals at the end, width 14–18 → 2.5 decrease, custard highlight core + dark gold thin thread. Make 6 small rolls on the outer edge of the head to create volume. All points follow the offset of `G.A.headC` (when drinking water and raising the head, they move together, and the farther down they are, the less they follow).
+- **S-shaped decorative hot air**: 3 milky white ribbons (width 26/20/14) + 1.8px brown stroke + center line, `sin(4q+φ-6t)·(18+70q)` traveling waves, horizontal spacing spreads out with height × (1+2.6q), end 34px spiral; overall `lean = -90 - 160·cup` falling to the left -** step pit**: choreo Lift the cup to your mouth. If the heat rises vertically, it will cross the girl's face. She must pour it toward the window with the cup.
+- Choreo: Use RIG to hold the cup, raise your head, blink, flick your tail, and breathe; the plate remains on the table (the table will not be empty after the cup is taken away).
+
+## Swatches
+Line `#4e3320`; gold `#c9a24a`/`#9c7a2e`; milky white `#f6eedb`; skin `#f6dcc4`; blonde `#e8bf55`/high light `#f6dc8a`/dark `#b9862a`; skirt `#f4ecda`; pink draped silk `#e6aaa5`/pleat `#d48e8c`; poppy `#d9706a`/`#b4504b`, flower heart `#3f6a4a`+gold dots; lily `#f7f2e6`; iron art `#3d7763`; cat `#e39a4c`/`#fbf3e3`/pattern `#c0672c`, eyes `#e6c040`; halo powder `#ebb8b2`, green ring `#5f9a8a`, Cat Halo Red `#b8473a`.
+
+## Step on the pit
+- **`drawGirl(mode:'line')` stacked on top will draw the outline of the covered part (far sleeve) through the torso** (also available in 09 benchmark). Instead, use both mode to draw lines in order of parts in the off-screen layer, and then make a thick outer outline as a whole.
+- The hair is initially 7 long strips 34px wide, like sausages/noodles; Mucha hair = a hair ball base + thin strands S curl + spiral ending, width ≤18.
+- Avoid frames with lt<0.33 when checking motion differences: during the first 20 frames after a transition starts, the engine applies a 1.03× beat-impact zoom, making the whole difference image red.
+
+## Still can be improved
+- The cat is still sitting in the RIG posture (white straight legs), and the setting draft is a lying fluffy orange cat; the Mucha flavor is mainly supported by a halo and thick and thin lines.
+- Marcellus is used for the title, and the design draft is a rounder hand-drawn Art Nouveau glyph; a set of letter paths can be handwritten.

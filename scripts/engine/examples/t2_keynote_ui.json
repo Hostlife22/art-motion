@@ -1,0 +1,77 @@
+{
+  "grammar": "t2_keynote_ui",
+  "duration": 10,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "data": {
+    "eyebrow": "NEW RELEASE",
+    "title": "Animation clips",
+    "subtitle": "One JSON spec. A frame-accurate animation."
+  },
+  "cues": [
+    {
+      "at": 0.0,
+      "kind": "title"
+    },
+    {
+      "at": 2.2,
+      "kind": "card",
+      "text": "8 animation grammars",
+      "sub": "From 3Blue1Brown to kinetic type",
+      "data": {
+        "icon": "layers"
+      }
+    },
+    {
+      "at": 3.0,
+      "kind": "card",
+      "text": "Frame-accurate timing",
+      "sub": "Frames = duration × frame rate",
+      "data": {
+        "icon": "clock",
+        "value": 30,
+        "suffix": " fps",
+        "label": "Default frame rate"
+      }
+    },
+    {
+      "at": 3.8,
+      "kind": "card",
+      "text": "Landscape and portrait",
+      "sub": "Layouts adapt to portrait",
+      "data": {
+        "icon": "phone"
+      }
+    },
+    {
+      "at": 6.0,
+      "kind": "number",
+      "text": "Nvidia’s revenue growth over five fiscal years",
+      "data": {
+        "value": 7.8,
+        "decimals": 1,
+        "suffix": " times"
+      }
+    },
+    {
+      "at": 7.2,
+      "kind": "card",
+      "text": "Rendered finance chart",
+      "sub": "NVIDIA FY2021–FY2025 annual reports",
+      "image": "assets/finance-chart-landscape.png"
+    },
+    {
+      "at": 8.4,
+      "kind": "highlight",
+      "data": {
+        "rect": [
+          0.648,
+          0.245,
+          0.104,
+          0.105
+        ]
+      }
+    }
+  ]
+}

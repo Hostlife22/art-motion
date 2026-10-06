@@ -1,0 +1,57 @@
+{
+  "grammar": "y1_kurzgesagt",
+  "duration": 10,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "data": {
+    "center": "Large model"
+  },
+  "cues": [
+    {
+      "at": 0.0,
+      "kind": "title",
+      "text": "What's inside a Large model?"
+    },
+    {
+      "at": 1.4,
+      "kind": "point",
+      "text": "Billions of parameters"
+    },
+    {
+      "at": 2.3,
+      "kind": "point",
+      "text": "Dozens of network layers"
+    },
+    {
+      "at": 3.2,
+      "kind": "point",
+      "text": "Vocabulary"
+    },
+    {
+      "at": 4.2,
+      "kind": "enter",
+      "text": "One network layer",
+      "data": {
+        "index": 1
+      }
+    },
+    {
+      "at": 6.2,
+      "kind": "point",
+      "text": "Attention"
+    },
+    {
+      "at": 7.0,
+      "kind": "point",
+      "text": "Feed-forward network"
+    },
+    {
+      "at": 8.0,
+      "kind": "highlight",
+      "data": {
+        "index": 0
+      }
+    }
+  ]
+}

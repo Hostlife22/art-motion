@@ -1,0 +1,45 @@
+{
+  "grammar": "y4_storytime",
+  "duration": 8.5,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "cues": [
+    {
+      "at": 0.1,
+      "kind": "point",
+      "text": "The first time I asked AI to write code for me,",
+      "sub": "AI, build me a website!"
+    },
+    {
+      "at": 2.0,
+      "kind": "insert",
+      "text": "3,000 lines",
+      "sub": "Build a website",
+      "data": {
+        "hit": 3.5,
+        "count": 3000,
+        "unit": "OK"
+      }
+    },
+    {
+      "at": 4.6,
+      "kind": "react"
+    },
+    {
+      "at": 5.9,
+      "kind": "point",
+      "text": "Where are these... posted?",
+      "data": {
+        "pose": "point"
+      }
+    },
+    {
+      "at": 7.2,
+      "kind": "highlight",
+      "data": {
+        "mark": "?"
+      }
+    }
+  ]
+}

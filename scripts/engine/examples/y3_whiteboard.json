@@ -1,0 +1,60 @@
+{
+  "grammar": "y3_whiteboard",
+  "duration": 10,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "cues": [
+    {
+      "at": 0.0,
+      "kind": "title",
+      "text": "Why does AI hallucinate?"
+    },
+    {
+      "at": 1.9,
+      "kind": "point",
+      "text": "It has read a lot of text"
+    },
+    {
+      "at": 2.8,
+      "kind": "draw",
+      "text": "Training text",
+      "data": {
+        "icon": "stack"
+      }
+    },
+    {
+      "at": 3.9,
+      "kind": "point",
+      "text": "It predicts the next word"
+    },
+    {
+      "at": 4.9,
+      "kind": "draw",
+      "text": "Predict next word",
+      "data": {
+        "icon": "network"
+      }
+    },
+    {
+      "at": 6.0,
+      "kind": "point",
+      "text": "No one has ever taught it to say \"I don't know.\""
+    },
+    {
+      "at": 6.9,
+      "kind": "draw",
+      "text": "It answers anyway",
+      "data": {
+        "icon": "chat"
+      }
+    },
+    {
+      "at": 8.0,
+      "kind": "highlight",
+      "data": {
+        "index": 2
+      }
+    }
+  ]
+}
