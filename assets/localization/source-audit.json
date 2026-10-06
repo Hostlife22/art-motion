@@ -38,7 +38,7 @@
     "Ideographic stroke entries removed; their license notice retained.",
     "Font-subsetting defaults use bundled Inter; optional compatibility features remain.",
     "The original duplicated Chinese/English root README sections are consolidated into one English document.",
-    "Milo replaces the former boy mascot in code, sprites, branding and showcase GIFs; original copyright attribution remains in LICENSE."
+    "Milo replaces the former boy mascot in code, sprites, branding and showcase GIFs; original copyright attribution is preserved in THIRD_PARTY_NOTICES.md; LICENSE identifies Hostlife22."
   ],
   "source_file_types": {
     "(no extension)": 2,
@@ -92,7 +92,7 @@
       "path": "LICENSE",
       "source_sha256": "6d6a2a9caf2e6d2b76974050427053b2892d8aa4c33fd168ce63a537fcee9d96",
       "source_bytes": 1086,
-      "current_bytes": 1086,
+      "current_bytes": 1067,
       "source_nonblank_lines": 17,
       "current_nonblank_lines": 17
     },
@@ -100,7 +100,7 @@
       "path": "README.md",
       "source_sha256": "8061facbbcc5365d8ac3dba8fb0d507a1f640a7e80a73d0d0c0a2f526ff09220",
       "source_bytes": 12868,
-      "current_bytes": 14571,
+      "current_bytes": 14715,
       "source_nonblank_lines": 121,
       "current_nonblank_lines": 144
     },

@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = {
-    'SKILL.md', 'README.md', 'LICENSE', 'CHANGELOG.md',
+    'SKILL.md', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md',
     'CONTRIBUTING.md', 'SECURITY.md', 'ACCESSIBILITY.md',
     'scripts/engine/index.html', 'scripts/engine/render.py',
     'scripts/engine/lib/rig_milo.js', 'assets/characters/milo/flat-atlas.png',

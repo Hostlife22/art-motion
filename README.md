@@ -208,7 +208,7 @@ GitHub Actions validates changes and publishes a release when a tag is pushed. R
 
 ## MIT license
 
-Project code is distributed under the [MIT license](LICENSE). Bundled fonts retain their [own license notices](scripts/engine/lib/fonts/LICENSES.md); the reference-film documentation includes a separate [third-party stroke-data notice](scripts/engine/reference_films/spacex/README.md#third-party-stroke-data).
+art-motion is maintained by [Hostlife22](https://github.com/Hostlife22) and distributed under the [MIT license](LICENSE). Retained upstream code is covered by [third-party notices](THIRD_PARTY_NOTICES.md). Bundled fonts retain their [own license notices](scripts/engine/lib/fonts/LICENSES.md); the reference-film documentation includes a separate [third-party stroke-data notice](scripts/engine/reference_films/spacex/README.md#third-party-stroke-data).
 
 ## Security
 
